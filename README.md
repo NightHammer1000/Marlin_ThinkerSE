@@ -8,6 +8,12 @@
 - Up2Date Configuration:
   - **NightStorm1000** 
 
+
+----------------------------------------
+#  THIS IS FOR PEOPLE WHO KNOW WHAT THEY ARE DOING. 
+#  YOU ARE RESPONSIBLE FOR ANY DAMAGES FROM WRONG HANDELING!
+----------------------------------------
+
 ## Support 3D printer
 
 | 3D Printer Model    | Motherboard                | Stepper Driver    
