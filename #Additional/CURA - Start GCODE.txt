@@ -1,0 +1,15 @@
+M201 X1000 Y1000 Z1000 E5000 ; sets max accelerations, mm/sec
+M203 X200 Y200 Z12 E120 ; sets max feedrate
+M204 P1250 R1250 T1250 ; sets accelration (P , T) and retract
+M205 S0 T0 ; sets min extruding and travel feedrate
+
+G28 ; Auto Home
+M420 S1
+G92 E0 ;Reset Extruder
+G1 Z2.0 F3000 ;Move Z Axis up
+G1 X10.1 Y20 Z0.28 F5000.0 ;Move to start position
+G1 X10.1 Y200.0 Z0.28 F1500.0 E15 ;Draw the first line
+G1 X10.4 Y200.0 Z0.28 F5000.0 ;Move to side a little
+G1 X10.4 Y20 Z0.28 F1500.0 E30 ;Draw the second line
+G92 E0 ;Reset Extruder
+G1 Z2.0 F3000 ;Move Z Axis up
