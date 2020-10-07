@@ -208,6 +208,22 @@
 #define E_MUX1_PIN                            16
 #define E_MUX2_PIN                            84  // 84 in MK2 Firmware
 
+#if HAS_TRINAMIC
+  /**
+   * TMC2208/TMC2209 stepper drivers
+   *
+   * Hardware serial communication ports.
+   * If undefined software serial is used according to the pins below
+   */
+  #define X_HARDWARE_SERIAL  Serial1
+  #define Y_HARDWARE_SERIAL  Serial1
+  #define Z_HARDWARE_SERIAL  Serial1
+  #define E0_HARDWARE_SERIAL Serial1
+
+  // Reduce baud rate to improve software serial reliability
+  #define TMC_BAUD_RATE 19200
+#endif
+
 //
 // LCD / Controller
 //
