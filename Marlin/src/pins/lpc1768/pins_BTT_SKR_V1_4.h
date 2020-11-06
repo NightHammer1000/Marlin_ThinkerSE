@@ -223,17 +223,39 @@
 #endif
 
 /**
- *              _____                                             _____
- *          NC | · · | GND                                    5V | · · | GND
- *       RESET | · · | 1.31(SD_DETECT)             (LCD_D7) 1.23 | · · | 1.22 (LCD_D6)
- *  (MOSI)0.18 | · · | 3.25(BTN_EN2)               (LCD_D5) 1.21 | · · | 1.20 (LCD_D4)
- * (SD_SS)0.16 | · · | 3.26(BTN_EN1)               (LCD_RS) 1.19 | · · | 1.18 (LCD_EN)
- *   (SCK)0.15 | · · | 0.17(MISO)                 (BTN_ENC) 0.28 | · · | 1.30 (BEEPER)
- *              -----                                             -----
- *              EXP2                                              EXP1
+ *               _____                                             _____
+ *           NC | · · | GND                                    5V | · · | GND
+ *        RESET | · · | 1.31 (SD_DETECT)            (LCD_D7) 1.23 | · · | 1.22 (LCD_D6)
+ *  (MOSI) 0.18 | · · | 3.25 (BTN_EN2)              (LCD_D5) 1.21 | · · | 1.20 (LCD_D4)
+ * (SD_SS) 0.16 | · · | 3.26 (BTN_EN1)              (LCD_RS) 1.19 | · · | 1.18 (LCD_EN)
+ *   (SCK) 0.15 | · · | 0.17 (MISO)                (BTN_ENC) 0.28 | · · | 1.30 (BEEPER)
+ *               -----                                             -----
+ *               EXP2                                              EXP1
  */
 #if HAS_WIRED_LCD
   #if ENABLED(ANET_FULL_GRAPHICS_LCD)
+    #error "CAUTION! ANET_FULL_GRAPHICS_LCD requires wiring modifications. See 'pins_BTT_SKR_V1_4.h' for details. Comment out this line to continue."
+
+   /**
+    * 1. Cut the tab off the LCD connector so it can be plugged into the "EXP1" connector the other way.
+    * 2. Swap the LCD's +5V (Pin2) and GND (Pin1) wires. (This is the critical part!)
+    * 3. Rewire the CLK Signal (LCD Pin9) to LCD Pin7. (LCD Pin9 remains open because this pin is open drain.)
+    * 4. A wire is needed to connect the Reset switch at J3 (LCD Pin7) to EXP2 (Pin3) on the board.
+    *
+    * !!! If you are unsure, ask for help! Your motherboard may be damaged in some circumstances !!!
+    *
+    * The ANET_FULL_GRAPHICS_LCD connector plug:
+    *
+    *                  BEFORE                          AFTER
+    *                  _____                           _____
+    *           GND 1 | 1 2 |  2 5V              5V 1 | 1 2 |  2 GND
+    *            CS 3 | 3 4 |  4 BTN_EN2         CS 3 | 3 4 |  4 BTN_EN2
+    *           SID 5 | 5 6    6 BTN_EN1        SID 5 | 5 6    6 BTN_EN1
+    *          open 7 | 7 8 |  8 BTN_ENC        CLK 7 | 7 8 |  8 BTN_ENC
+    *           CLK 9 | 9 10| 10 Beeper        open 9 | 9 10| 10 Beeper
+    *                  -----                           -----
+    *                   LCD                             LCD
+    */
 
     #define LCD_PINS_RS                    P1_23
 
@@ -293,20 +315,44 @@
     #define TOUCH_BUTTONS_HW_SPI
     #define TOUCH_BUTTONS_HW_SPI_DEVICE        1
 
-    #ifndef GRAPHICAL_TFT_UPSCALE
-      #define GRAPHICAL_TFT_UPSCALE            3
-    #endif
+    // SPI 1
+    #define SCK_PIN                        P0_15
+    #define MISO_PIN                       P0_17
+    #define MOSI_PIN                       P0_18
 
     // Disable any LCD related PINs config
     #define LCD_PINS_ENABLE                -1
     #define LCD_PINS_RS                    -1
 
-    // Emulated DOGM have xpt calibration values independent of display resolution
-    #if ENABLED(SPI_GRAPHICAL_TFT)
-      #define XPT2046_X_CALIBRATION      -11245
-      #define XPT2046_Y_CALIBRATION        8629
-      #define XPT2046_X_OFFSET              685
-      #define XPT2046_Y_OFFSET             -285
+    // XPT2046 Touch Screen calibration
+    #if ENABLED(TFT_CLASSIC_UI)
+      #ifndef XPT2046_X_CALIBRATION
+        #define XPT2046_X_CALIBRATION     -11245
+      #endif
+      #ifndef XPT2046_Y_CALIBRATION
+        #define XPT2046_Y_CALIBRATION       8629
+      #endif
+      #ifndef XPT2046_X_OFFSET
+        #define XPT2046_X_OFFSET             685
+      #endif
+      #ifndef XPT2046_Y_OFFSET
+        #define XPT2046_Y_OFFSET            -285
+      #endif
+    #elif ENABLED(TFT_480x320_SPI)
+      #ifndef XPT2046_X_CALIBRATION
+        #define XPT2046_X_CALIBRATION     -17232
+      #endif
+      #ifndef XPT2046_Y_CALIBRATION
+        #define XPT2046_Y_CALIBRATION      11196
+      #endif
+      #ifndef XPT2046_X_OFFSET
+        #define XPT2046_X_OFFSET            1047
+      #endif
+      #ifndef XPT2046_Y_OFFSET
+        #define XPT2046_Y_OFFSET            -358
+      #endif
+
+      #define TFT_BUFFER_SIZE               2400
     #endif
 
   #elif IS_TFTGLCD_PANEL
@@ -371,10 +417,15 @@
         #define FORCE_SOFT_SPI
       #endif
 
-      #if ENABLED(ULTIPANEL)
+      #if IS_ULTIPANEL
         #define LCD_PINS_D5                P1_21
         #define LCD_PINS_D6                P1_22
         #define LCD_PINS_D7                P1_23
+
+        #if ENABLED(REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER)
+          #define BTN_ENC_EN         LCD_PINS_D7  // Detect the presence of the encoder
+        #endif
+
       #endif
 
     #endif // !FYSETC_MINI_12864

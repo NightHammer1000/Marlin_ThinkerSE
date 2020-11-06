@@ -26,6 +26,13 @@
  *
  * LCD Menu Messages
  * See also https://marlinfw.org/docs/development/lcd_language.html
+ *
+ * Substitutions are applied for the following characters when used
+ * in menu items that call lcd_put_u8str_ind_P with an index:
+ *
+ *   = displays  '0'....'10' for indexes 0 - 10
+ *   ~ displays  '1'....'11' for indexes 0 - 10
+ *   * displays 'E1'...'E11' for indexes 0 - 10 (By default. Uses LCD_FIRST_TOOL)
  */
 
 #define DISPLAY_CHARSET_ISO10646_1
@@ -65,6 +72,9 @@ namespace Language_it {
   PROGMEM Language_Str MSG_AUTO_HOME_Z                     = _UxGT("Home asse Z");
   PROGMEM Language_Str MSG_AUTO_Z_ALIGN                    = _UxGT("Allineam.automat. Z");
   PROGMEM Language_Str MSG_ASSISTED_TRAMMING               = _UxGT("Tramming assistito");
+  PROGMEM Language_Str MSG_ITERATION                       = _UxGT("Iterazione G34: %i");
+  PROGMEM Language_Str MSG_DECREASING_ACCURACY             = _UxGT("Precis.in calo!");
+  PROGMEM Language_Str MSG_ACCURACY_ACHIEVED               = _UxGT("Precis.raggiunta");
   PROGMEM Language_Str MSG_LEVEL_BED_HOMING                = _UxGT("Home assi XYZ");
   PROGMEM Language_Str MSG_LEVEL_BED_WAITING               = _UxGT("Premi per iniziare");
   PROGMEM Language_Str MSG_LEVEL_BED_NEXT_POINT            = _UxGT("Punto successivo");
@@ -365,6 +375,7 @@ namespace Language_it {
   PROGMEM Language_Str MSG_PAUSING                         = _UxGT("Messa in pausa...");
   PROGMEM Language_Str MSG_PAUSE_PRINT                     = _UxGT("Pausa stampa");
   PROGMEM Language_Str MSG_RESUME_PRINT                    = _UxGT("Riprendi stampa");
+  PROGMEM Language_Str MSG_HOST_START_PRINT                = _UxGT("Host Avvio");
   PROGMEM Language_Str MSG_STOP_PRINT                      = _UxGT("Arresta stampa");
   PROGMEM Language_Str MSG_PRINTING_OBJECT                 = _UxGT("Stampa Oggetto");
   PROGMEM Language_Str MSG_CANCEL_OBJECT                   = _UxGT("Cancella Oggetto");
@@ -385,10 +396,10 @@ namespace Language_it {
   PROGMEM Language_Str MSG_CONTROL_RETRACT_SWAP            = _UxGT("Scamb. Ritrai mm");
   PROGMEM Language_Str MSG_CONTROL_RETRACTF                = _UxGT("Ritrai  V");
   PROGMEM Language_Str MSG_CONTROL_RETRACT_ZHOP            = _UxGT("Salta mm");
-  PROGMEM Language_Str MSG_CONTROL_RETRACT_RECOVER         = _UxGT("Unretr. mm");
-  PROGMEM Language_Str MSG_CONTROL_RETRACT_RECOVER_SWAP    = _UxGT("Scamb. Unretr. mm");
-  PROGMEM Language_Str MSG_CONTROL_RETRACT_RECOVERF        = _UxGT("Unretract V");
-  PROGMEM Language_Str MSG_CONTROL_RETRACT_RECOVER_SWAPF   = _UxGT("S UnRet V");
+  PROGMEM Language_Str MSG_CONTROL_RETRACT_RECOVER         = _UxGT("Avanza mm");
+  PROGMEM Language_Str MSG_CONTROL_RETRACT_RECOVER_SWAP    = _UxGT("Scamb. Avanza mm");
+  PROGMEM Language_Str MSG_CONTROL_RETRACT_RECOVERF        = _UxGT("Avanza V");
+  PROGMEM Language_Str MSG_CONTROL_RETRACT_RECOVER_SWAPF   = _UxGT("Scamb. Avanza V");
   PROGMEM Language_Str MSG_AUTORETRACT                     = _UxGT("AutoRitrai");
   PROGMEM Language_Str MSG_FILAMENT_SWAP_LENGTH            = _UxGT("Lunghezza scambio");
   PROGMEM Language_Str MSG_FILAMENT_SWAP_EXTRA             = _UxGT("Extra scambio");
@@ -396,7 +407,7 @@ namespace Language_it {
   PROGMEM Language_Str MSG_TOOL_CHANGE                     = _UxGT("Cambio utensile");
   PROGMEM Language_Str MSG_TOOL_CHANGE_ZLIFT               = _UxGT("Risalita Z");
   PROGMEM Language_Str MSG_SINGLENOZZLE_PRIME_SPEED        = _UxGT("Velocità innesco");
-  PROGMEM Language_Str MSG_SINGLENOZZLE_RETRACT_SPEED      = _UxGT("Velocità retrazione");
+  PROGMEM Language_Str MSG_SINGLENOZZLE_RETRACT_SPEED      = _UxGT("Velocità ritrazione");
   PROGMEM Language_Str MSG_FILAMENT_PARK_ENABLED           = _UxGT("Parcheggia testa");
   PROGMEM Language_Str MSG_SINGLENOZZLE_UNRETRACT_SPEED    = _UxGT("Recover Speed");
   PROGMEM Language_Str MSG_SINGLENOZZLE_FAN_SPEED          = _UxGT("Velocità ventola");
@@ -444,6 +455,7 @@ namespace Language_it {
   PROGMEM Language_Str MSG_ZPROBE_XOFFSET                  = _UxGT("Offset X sonda");
   PROGMEM Language_Str MSG_ZPROBE_YOFFSET                  = _UxGT("Offset Y sonda");
   PROGMEM Language_Str MSG_ZPROBE_ZOFFSET                  = _UxGT("Offset Z sonda");
+  PROGMEM Language_Str MSG_MOVE_NOZZLE_TO_BED              = _UxGT("Muovi ugel.su letto");
   PROGMEM Language_Str MSG_BABYSTEP_X                      = _UxGT("Babystep X");
   PROGMEM Language_Str MSG_BABYSTEP_Y                      = _UxGT("Babystep Y");
   PROGMEM Language_Str MSG_BABYSTEP_Z                      = _UxGT("Babystep Z");
@@ -648,4 +660,7 @@ namespace Language_it {
   PROGMEM Language_Str MSG_HEATER_TIMEOUT                  = _UxGT("Timeout riscaldatore");
   PROGMEM Language_Str MSG_REHEAT                          = _UxGT("Riscalda");
   PROGMEM Language_Str MSG_REHEATING                       = _UxGT("Riscaldando...");
+
+  PROGMEM Language_Str MSG_PROBE_WIZARD                    = _UxGT("Proc.guid.sonda Z");
+  PROGMEM Language_Str MSG_SOUND                           = _UxGT("Suono");
 }

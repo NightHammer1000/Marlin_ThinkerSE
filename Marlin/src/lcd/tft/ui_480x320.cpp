@@ -26,7 +26,7 @@
 
 #include "ui_480x320.h"
 
-#include "../ultralcd.h"
+#include "../marlinui.h"
 #include "../menu/menu.h"
 #include "../../libs/numtostr.h"
 
@@ -341,7 +341,7 @@ void MarlinUI::draw_status_screen() {
 
   #if ENABLED(TOUCH_SCREEN)
     add_control(404, 180, menu_main, imgSettings);
-    TERN_(SDSUPPORT, add_control(12, 180, menu_media, imgSD, card.isMounted() && !printingIsActive(), COLOR_CONTROL_ENABLED, card.isMounted() && printingIsActive() ? COLOR_BUSY : COLOR_CONTROL_DISABLED));
+    TERN_(SDSUPPORT, add_control(12, 180, menu_media, imgSD, !printingIsActive(), COLOR_CONTROL_ENABLED, card.isMounted() && printingIsActive() ? COLOR_BUSY : COLOR_CONTROL_DISABLED));
   #endif
 }
 
@@ -457,7 +457,7 @@ void MenuEditItemBase::draw_edit_screen(PGM_P const pstr, const char* const valu
 void MenuItem_confirm::draw_select_screen(PGM_P const yes, PGM_P const no, const bool yesno, PGM_P const pref, const char * const string/*=nullptr*/, PGM_P const suff/*=nullptr*/) {
   uint16_t line = 1;
 
-  if (string == NULL) line++;
+  if (!string) line++;
 
   menu_line(line++);
   tft_string.set(pref);
@@ -813,27 +813,9 @@ static void moveAxis(AxisEnum axis, const int8_t direction) {
   }
 
   if (!ui.manual_move.processing) {
-    // Start with no limits to movement
-    float min = current_position[axis] - 1000,
-          max = current_position[axis] + 1000;
-
-    // Limit to software endstops, if enabled
-    #if HAS_SOFTWARE_ENDSTOPS
-      if (soft_endstops_enabled) switch (axis) {
-        case X_AXIS:
-          TERN_(MIN_SOFTWARE_ENDSTOP_X, min = soft_endstop.min.x);
-          TERN_(MAX_SOFTWARE_ENDSTOP_X, max = soft_endstop.max.x);
-          break;
-        case Y_AXIS:
-          TERN_(MIN_SOFTWARE_ENDSTOP_Y, min = soft_endstop.min.y);
-          TERN_(MAX_SOFTWARE_ENDSTOP_Y, max = soft_endstop.max.y);
-          break;
-        case Z_AXIS:
-          TERN_(MIN_SOFTWARE_ENDSTOP_Z, min = soft_endstop.min.z);
-          TERN_(MAX_SOFTWARE_ENDSTOP_Z, max = soft_endstop.max.z);
-        default: break;
-      }
-    #endif // HAS_SOFTWARE_ENDSTOPS
+    // Get motion limit from software endstops, if any
+    float min, max;
+    soft_endstop.get_manual_axis_limits(axis, min, max);
 
     // Delta limits XY based on the current offset from center
     // This assumes the center is 0,0
@@ -963,7 +945,7 @@ static void drawBtn(int x, int y, const char* label, int32_t data, MarlinImage i
   tft.add_image(0, 0, imgBtn52Rounded, bgColor, COLOR_BACKGROUND, COLOR_DARKGREY);
 
   // TODO: Make an add_text() taking a font arg
-  if (label != NULL) {
+  if (label) {
     tft_string.set(label);
     tft_string.trim();
     tft.add_text(tft_string.center(width), height / 2 - tft_string.font_height() / 2, bgColor, tft_string);

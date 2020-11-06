@@ -35,7 +35,7 @@
  *
  * Advanced settings can be found in Configuration_adv.h
  */
-#define CONFIGURATION_H_VERSION 020007
+#define CONFIGURATION_H_VERSION 020008
 
 //===========================================================================
 //============================= Getting Started =============================
@@ -107,7 +107,8 @@
 
 /**
  * Select a secondary serial port on the board to use for communication with the host.
- * :[-1, 0, 1, 2, 3, 4, 5, 6, 7]
+ * Currently Ethernet (-2) is only supported on Teensy 4.1 boards.
+ * :[-2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
  */
 //#define SERIAL_PORT_2 -1
 
@@ -334,6 +335,9 @@
   //#define PSU_DEFAULT_OFF         // Keep power off until enabled directly with M80
   //#define PSU_POWERUP_DELAY 250   // (ms) Delay for the PSU to warm up to full power
 
+  //#define PSU_POWERUP_GCODE  "M355 S1"  // G-code to run after power-on (e.g., case light on)
+  //#define PSU_POWEROFF_GCODE "M355 S0"  // G-code to run before power-off (e.g., case light off)
+
   //#define AUTO_POWER_CONTROL      // Enable automatic control of the PS_ON pin
   #if ENABLED(AUTO_POWER_CONTROL)
     #define AUTO_POWER_FANS         // Turn on PSU if fans need power
@@ -346,11 +350,10 @@
   #endif
 #endif
 
-// @section temperature
-
 //===========================================================================
 //============================= Thermal Settings ============================
 //===========================================================================
+// @section temperature
 
 /**
  * --NORMAL IS 4.7kohm PULLUP!-- 1kohm pullup can be used on hotend sensor, using correct resistor and table
@@ -431,6 +434,12 @@
 // Dummy thermistor constant temperature readings, for use with 998 and 999
 #define DUMMY_THERMISTOR_998_VALUE 25
 #define DUMMY_THERMISTOR_999_VALUE 100
+
+// Resistor values when using a MAX31865 (sensor -5)
+// Sensor value is typically 100 (PT100) or 1000 (PT1000)
+// Calibration value is typically 430 ohm for AdaFruit PT100 modules and 4300 ohm for AdaFruit PT1000 modules.
+//#define MAX31865_SENSOR_OHMS      100
+//#define MAX31865_CALIBRATION_OHMS 430
 
 // Use temp sensor 1 as a redundant sensor with sensor 0. If the readings
 // from the two sensors differ too much the print will be aborted.
@@ -664,6 +673,8 @@
  * stepper drivers that support them. You may also override timing options in Configuration_adv.h.
  *
  * A4988 is assumed for unspecified drivers.
+ *
+ * Use TMC2208/TMC2208_STANDALONE for TMC2225 drivers and TMC2209/TMC2209_STANDALONE for TMC2226 drivers.
  *
  * Options: A4988, A5984, DRV8825, LV8729, L6470, L6474, POWERSTEP01,
  *          TB6560, TB6600, TMC2100,
@@ -1160,6 +1171,12 @@
 /**
  * Filament Runout Sensors
  * Mechanical or opto endstops are used to check for the presence of filament.
+ *
+ * IMPORTANT: Runout will only trigger if Marlin is aware that a print job is running.
+ * Marlin knows a print job is running when:
+ *  1. Running a print job from media started with M24.
+ *  2. The Print Job Timer has been started with M75.
+ *  3. The heaters were turned on and PRINTJOB_TIMER_AUTOSTART is enabled.
  *
  * RAMPS-based boards use SERVO3_PIN for the first runout sensor.
  * For other boards you may need to define FIL_RUNOUT_PIN, FIL_RUNOUT2_PIN, etc.
@@ -2186,7 +2203,7 @@
 
 //
 // Third-party or vendor-customized controller interfaces.
-// Sources should be installed in 'src/lcd/extensible_ui'.
+// Sources should be installed in 'src/lcd/extui'.
 //
 //#define EXTENSIBLE_UI
 
@@ -2198,43 +2215,108 @@
 //=============================== Graphical TFTs ==============================
 //=============================================================================
 
-//
-// TFT display with optional touch screen
-// Color Marlin UI with standard menu system
-//
-//#define TFT_320x240
-//#define TFT_320x240_SPI
-//#define TFT_480x320
-//#define TFT_480x320_SPI
+/**
+ * Specific TFT Model Presets. Enable one of the following options
+ * or enable TFT_GENERIC and set sub-options.
+ */
 
 //
-// Skip autodetect and force specific TFT driver
-// Mandatory for SPI screens with no MISO line
-// Available drivers are: ST7735, ST7789, ST7796, R61505, ILI9328, ILI9341, ILI9488
+// 480x320, 3.5", SPI Display From MKS
+// Normally used in MKS Robin Nano V2
 //
-//#define TFT_DRIVER AUTO
+//#define MKS_TS35_V2_0
 
 //
-// SPI display (MKS Robin Nano V2.0, MKS Gen L V2.0)
-// Upscaled 128x64 Marlin UI
+// 320x240, 2.4", FSMC Display From MKS
+// Normally used in MKS Robin Nano V1.2
 //
-//#define SPI_GRAPHICAL_TFT
+//#define MKS_ROBIN_TFT24
 
 //
-// FSMC display (MKS Robin, Alfawise U20, JGAurora A5S, REXYZ A1, etc.)
-// Upscaled 128x64 Marlin UI
+// 320x240, 2.8", FSMC Display From MKS
+// Normally used in MKS Robin Nano V1.2
 //
-//#define FSMC_GRAPHICAL_TFT
+//#define MKS_ROBIN_TFT28
 
 //
-// TFT LVGL UI
+// 320x240, 3.2", FSMC Display From MKS
+// Normally used in MKS Robin Nano V1.2
 //
-// Using default MKS icons and fonts from: https://git.io/JJvzK
-// Just copy the 'assets' folder from the build directory to the
-// root of your SD card, together with the compiled firmware.
+//#define MKS_ROBIN_TFT32
+
 //
-//#define TFT_LVGL_UI_FSMC  // Robin nano v1.2 uses FSMC
-//#define TFT_LVGL_UI_SPI   // Robin nano v2.0 uses SPI
+// 480x320, 3.5", FSMC Display From MKS
+// Normally used in MKS Robin Nano V1.2
+//
+//#define MKS_ROBIN_TFT35
+
+//
+// 480x272, 4.3", FSMC Display From MKS
+//
+//#define MKS_ROBIN_TFT43
+
+//
+// 320x240, 3.2", FSMC Display From MKS
+// Normally used in MKS Robin
+//
+//#define MKS_ROBIN_TFT_V1_1R
+
+//
+// 480x320, 3.5", FSMC Stock Display from TronxXY
+//
+//#define TFT_TRONXY_X5SA
+
+//
+// 480x320, 3.5", FSMC Stock Display from AnyCubic
+//
+//#define ANYCUBIC_TFT35
+
+//
+// 320x240, 2.8", FSMC Stock Display from Longer/Alfawise
+//
+//#define LONGER_LK_TFT28
+
+//
+// Generic TFT with detailed options
+//
+//#define TFT_GENERIC
+#if ENABLED(TFT_GENERIC)
+  // :[ 'AUTO', 'ST7735', 'ST7789', 'ST7796', 'R61505', 'ILI9328', 'ILI9341', 'ILI9488' ]
+  #define TFT_DRIVER AUTO
+
+  // Interface. Enable one of the following options:
+  //#define TFT_INTERFACE_FSMC
+  //#define TFT_INTERFACE_SPI
+
+  // TFT Resolution. Enable one of the following options:
+  //#define TFT_RES_320x240
+  //#define TFT_RES_480x272
+  //#define TFT_RES_480x320
+#endif
+
+/**
+ * TFT UI - User Interface Selection. Enable one of the following options:
+ *
+ *   TFT_CLASSIC_UI - Emulated DOGM - 128x64 Upscaled
+ *   TFT_COLOR_UI   - Marlin Default Menus, Touch Friendly, using full TFT capabilities
+ *   TFT_LVGL_UI    - A Modern UI using LVGL
+ *
+ *   For LVGL_UI also copy the 'assets' folder from the build directory to the
+ *   root of your SD card, together with the compiled firmware.
+ */
+//#define TFT_CLASSIC_UI
+//#define TFT_COLOR_UI
+//#define TFT_LVGL_UI
+
+/**
+ * TFT Rotation. Set to one of the following values:
+ *
+ *   TFT_ROTATE_90,  TFT_ROTATE_90_MIRROR_X,  TFT_ROTATE_90_MIRROR_Y,
+ *   TFT_ROTATE_180, TFT_ROTATE_180_MIRROR_X, TFT_ROTATE_180_MIRROR_Y,
+ *   TFT_ROTATE_270, TFT_ROTATE_270_MIRROR_X, TFT_ROTATE_270_MIRROR_Y,
+ *   TFT_MIRROR_X, TFT_MIRROR_Y, TFT_NO_ROTATION
+ */
+//#define TFT_ROTATION TFT_NO_ROTATION
 
 //=============================================================================
 //============================  Other Controllers  ============================
